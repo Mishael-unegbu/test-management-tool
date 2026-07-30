@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   CreateTestCaseRequest,
   TestCase,
   TestCaseEditPayload,
+  TestCaseSearchFilters,
 } from '../models/test-case.model';
 
 const API_BASE_URL = 'http://localhost:3000/api';
@@ -39,5 +40,31 @@ export class TestCaseService {
     return this.http.get<TestCase[]>(
       `${API_BASE_URL}/user-stories/${encodeURIComponent(String(storyId))}/test-cases`
     );
+  }
+
+  // Test Cases table view (list all / filter). Not a numbered backlog story
+  // (same situation as ProjectService.listProjects() and
+  // UserStoryService.searchUserStories()) — added directly on request so
+  // the Test Cases nav link has something to show without requiring a
+  // storyId first. Only sends filters that are actually set.
+  searchTestCases(filters: TestCaseSearchFilters = {}): Observable<TestCase[]> {
+    let params = new HttpParams();
+    if (filters.storyId !== undefined && filters.storyId !== '') {
+      params = params.set('storyId', String(filters.storyId));
+    }
+    if (filters.projectId !== undefined && filters.projectId !== '') {
+      params = params.set('projectId', String(filters.projectId));
+    }
+    if (filters.title) {
+      params = params.set('title', filters.title);
+    }
+    if (filters.status) {
+      params = params.set('status', filters.status);
+    }
+    if (filters.priority) {
+      params = params.set('priority', filters.priority);
+    }
+
+    return this.http.get<TestCase[]>(`${API_BASE_URL}/test-cases`, { params });
   }
 }

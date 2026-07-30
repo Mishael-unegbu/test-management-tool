@@ -44,9 +44,10 @@ export interface TestCaseEditPayload {
 
 // NOTE: there's no "Search Test Case" story in the Product Backlog (US-009/010
 // only cover Create/Edit — unlike User Stories, which have US-007 Search User
-// Story). Included here for structural symmetry with UserStorySearchFilters,
-// but this isn't backed by an approved story yet — flag before a dev tool
-// builds a /api/test-cases search endpoint against it.
+// Story). GET /api/test-cases now exists anyway (mirrors ProjectService's
+// listProjects() / UserStoryService's searchUserStories() — same situation:
+// not a numbered story, added directly on request to back an unfiltered
+// Test Cases table view). See TestCaseService.searchTestCases().
 export interface TestCaseSearchFilters {
   storyId?: number | string;
   projectId?: number | string;

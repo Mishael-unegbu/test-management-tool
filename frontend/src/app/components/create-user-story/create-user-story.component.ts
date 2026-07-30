@@ -4,9 +4,18 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UserStoryService } from '../../services/user-story.service';
 import { ProjectService } from '../../services/project.service';
+import { Project } from '../../models/project.model';
 import { USER_STORY_STATUSES, USER_STORY_PRIORITIES } from '../../models/user-story.model';
 import { extractErrorMessage } from '../../shared/http-error.util';
 
+/**
+ * US-005 Create User Story.
+ * Reachable two ways:
+ *   /projects/:projectId/user-stories/new  → project pre-selected from route
+ *   /user-stories/new                       → user picks project from dropdown
+ * Both use the same component; the dropdown is always shown, but pre-selects
+ * the project when one is provided in the route.
+ */
 @Component({
   selector: 'app-create-user-story',
   standalone: true,
@@ -15,21 +24,19 @@ import { extractErrorMessage } from '../../shared/http-error.util';
   styleUrls: ['./create-user-story.component.css'],
 })
 export class CreateUserStoryComponent implements OnInit {
-  projectId: string | null = null;
-  projectName: string | null = null;
-  projectLoadError: string | null = null;
-
-  readonly allowedStatuses = USER_STORY_STATUSES;
+  readonly allowedStatuses   = USER_STORY_STATUSES;
   readonly allowedPriorities = USER_STORY_PRIORITIES;
+
+  // All projects for the dropdown
+  projects: Project[] = [];
+  projectsLoading = false;
+  projectsError = '';
 
   submitting = false;
   errorMessage = '';
   successMessage = '';
   createdStoryId: number | null = null;
 
-  // Acceptance criteria are stored as individual items in this array.
-  // When submitting, they are joined with '\n' into the single
-  // AcceptanceCriteria string the backend/workbook expects.
   acItems: string[] = [];
   acInput = '';
   acInputError = '';
@@ -43,47 +50,48 @@ export class CreateUserStoryComponent implements OnInit {
     private projectService: ProjectService
   ) {
     this.form = this.fb.group({
-      title: ['', [Validators.required, Validators.maxLength(200)]],
+      projectId:   ['', Validators.required],   // now a real form field
+      title:       ['', [Validators.required, Validators.maxLength(200)]],
       description: [''],
-      priority: [''],
-      status: ['Open'],
-      createdBy: ['', Validators.required],
+      priority:    [''],
+      status:      ['Open'],
+      createdBy:   ['', Validators.required],
     });
   }
 
   ngOnInit(): void {
-    this.projectId = this.route.snapshot.paramMap.get('projectId');
-    if (!this.projectId) {
-      this.projectLoadError = 'No project ID was provided.';
-      return;
-    }
-    this.projectService.getProjectById(this.projectId).subscribe({
-      next: (project) => { this.projectName = project.ProjectName; },
-      error: () => { this.projectLoadError = `Project "${this.projectId}" was not found.`; },
+    // Load all projects for the dropdown
+    this.projectsLoading = true;
+    this.projectService.listProjects().subscribe({
+      next: (projects) => {
+        this.projects = projects;
+        this.projectsLoading = false;
+
+        // Pre-select if a projectId was supplied in the route
+        const routeProjectId = this.route.snapshot.paramMap.get('projectId');
+        if (routeProjectId) {
+          this.form.patchValue({ projectId: routeProjectId });
+        }
+      },
+      error: () => {
+        this.projectsError = 'Could not load projects. Please refresh the page.';
+        this.projectsLoading = false;
+      },
     });
   }
 
-  /** Add the current input value as a new acceptance criterion. */
   addAc(): void {
     this.acInputError = '';
     const trimmed = this.acInput.trim();
-    if (!trimmed) {
-      this.acInputError = 'Please enter a criterion before adding.';
-      return;
-    }
+    if (!trimmed) { this.acInputError = 'Please enter a criterion before adding.'; return; }
     this.acItems = [...this.acItems, trimmed];
     this.acInput = '';
   }
 
-  /** Allow pressing Enter in the AC input to add without clicking the button. */
   onAcKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.addAc();
-    }
+    if (event.key === 'Enter') { event.preventDefault(); this.addAc(); }
   }
 
-  /** Remove an acceptance criterion by index. */
   removeAc(index: number): void {
     this.acItems = this.acItems.filter((_, i) => i !== index);
   }
@@ -93,7 +101,7 @@ export class CreateUserStoryComponent implements OnInit {
     this.successMessage = '';
     this.createdStoryId = null;
 
-    if (this.form.invalid || !this.projectId) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
@@ -103,16 +111,13 @@ export class CreateUserStoryComponent implements OnInit {
 
     this.userStoryService
       .createUserStory({
-        projectId: Number(this.projectId),
-        title: value.title!.trim(),
-        description: value.description ?? '',
-        // Join the individual items with newlines — the backend stores this
-        // as a single string in the AcceptanceCriteria column; the Edit page
-        // splits it back on load.
+        projectId:          Number(value.projectId),
+        title:              value.title!.trim(),
+        description:        value.description        ?? '',
         acceptanceCriteria: this.acItems.join('\n'),
-        priority: value.priority ?? '',
-        status: value.status ?? 'Open',
-        createdBy: value.createdBy!.trim(),
+        priority:           value.priority           ?? '',
+        status:             value.status             ?? 'Open',
+        createdBy:          value.createdBy!.trim(),
       })
       .subscribe({
         next: (story) => {
@@ -121,12 +126,14 @@ export class CreateUserStoryComponent implements OnInit {
           this.createdStoryId = story.StoryID;
           this.acItems = [];
           this.acInput = '';
+          // Keep the selected project so the user can add another story to the same project
           this.form.reset({
-            title: '',
+            projectId:   value.projectId,
+            title:       '',
             description: '',
-            priority: '',
-            status: 'Open',
-            createdBy: value.createdBy,
+            priority:    '',
+            status:      'Open',
+            createdBy:   value.createdBy,
           });
         },
         error: (err) => {

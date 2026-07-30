@@ -109,6 +109,53 @@ describe('TestCases controller (via routes)', () => {
     });
   });
 
+  describe('GET /api/test-cases (list all / filter)', () => {
+    it('returns 200 with all test cases when no filters are given', async () => {
+      testCasesService.listTestCases.mockResolvedValue([
+        { TestCaseID: 1, Title: 'TC 1' },
+        { TestCaseID: 2, Title: 'TC 2' },
+      ]);
+
+      const res = await request(app).get('/api/test-cases');
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(2);
+      expect(testCasesService.listTestCases).toHaveBeenCalledWith({
+        storyId: undefined,
+        projectId: undefined,
+        title: undefined,
+        status: undefined,
+        priority: undefined,
+      });
+    });
+
+    it('passes query filters through to the service', async () => {
+      testCasesService.listTestCases.mockResolvedValue([{ TestCaseID: 1, StoryID: 3, Title: 'Login' }]);
+
+      const res = await request(app).get('/api/test-cases?storyId=3&status=Open');
+      expect(res.status).toBe(200);
+      expect(testCasesService.listTestCases).toHaveBeenCalledWith({
+        storyId: '3',
+        projectId: undefined,
+        title: undefined,
+        status: 'Open',
+        priority: undefined,
+      });
+    });
+
+    it('returns 200 with an empty array when nothing matches', async () => {
+      testCasesService.listTestCases.mockResolvedValue([]);
+      const res = await request(app).get('/api/test-cases?title=nonexistent');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([]);
+    });
+
+    it('returns 500 when the service throws', async () => {
+      testCasesService.listTestCases.mockRejectedValue(new Error('boom'));
+      const res = await request(app).get('/api/test-cases');
+      expect(res.status).toBe(500);
+    });
+  });
+
   describe('PUT /api/test-cases/:id (US-010)', () => {
     it('returns 200 with the updated test case', async () => {
       testCasesService.getAllowedPriorities.mockResolvedValue(['P1', 'P2', 'P3', 'P4']);

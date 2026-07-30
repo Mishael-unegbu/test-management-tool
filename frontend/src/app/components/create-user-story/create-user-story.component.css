@@ -26,6 +26,8 @@
   margin-bottom: 18px;
 }
 
+.loading-select { color: #9ca3af; }
+
 label {
   display: block;
   margin-bottom: 14px;

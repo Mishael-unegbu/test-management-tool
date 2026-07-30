@@ -25,10 +25,10 @@
     <div class="loading" *ngIf="loading">Loading test cases&hellip;</div>
     <div class="error-msg" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
 
-    <!-- No story selected -->
-    <div class="empty" *ngIf="!loading && !errorMessage && !filteredStoryId">
-      <p>Select a user story to see its test cases.</p>
-      <a routerLink="/user-stories" class="add-btn">Go to User Stories</a>
+    <!-- Unfiltered, no test cases exist anywhere yet -->
+    <div class="empty" *ngIf="!loading && !errorMessage && !filteredStoryId && testCases.length === 0">
+      <p>No test cases found.</p>
+      <a routerLink="/user-stories" class="add-btn">Go to User Stories to add one</a>
     </div>
 
     <!-- Story selected but no test cases yet -->

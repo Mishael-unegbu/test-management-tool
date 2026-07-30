@@ -1,23 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TestCaseService } from '../../services/test-case.service';
 import { UserStoryService } from '../../services/user-story.service';
 import { TestCase, TestCaseEditPayload, TEST_CASE_STATUSES, TEST_CASE_PRIORITIES } from '../../models/test-case.model';
 import { extractErrorMessage } from '../../shared/http-error.util';
 
-/**
- * US-010 Edit Test Case.
- * Lives at /test-cases/:id/edit — id = TestCaseID.
- * Loads the test case on init, pre-populates editable fields, and PUTs
- * changes back. Immutable fields (TestCaseID, StoryID, ProjectID,
- * CreatedDate, UpdatedDate) are never included in the form or the payload.
- */
 @Component({
   selector: 'app-edit-test-case',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './edit-test-case.component.html',
   styleUrls: ['./edit-test-case.component.css'],
 })
@@ -25,19 +18,23 @@ export class EditTestCaseComponent implements OnInit {
   form: FormGroup;
   testCaseId: string | null = null;
 
-  readonly allowedStatuses  = TEST_CASE_STATUSES;
+  readonly allowedStatuses   = TEST_CASE_STATUSES;
   readonly allowedPriorities = TEST_CASE_PRIORITIES;
 
-  loading    = false;
-  saving     = false;
-  loadError: string | null = null;
-  saveError: string | null = null;
-  saveSuccess = false;
+  loading     = false;
+  saving      = false;
+  loadError:   string | null = null;
+  saveError:   string | null = null;
+  saveSuccess  = false;
 
-  // Context fields — loaded after the test case loads so we can show
-  // "Under story: <title>" above the form.
   storyId:    number | null = null;
   storyTitle: string | null = null;
+
+  // Test steps — split from the stored '\n'-delimited string on load,
+  // joined back on save. Same pattern as Acceptance Criteria on User Stories.
+  stepItems: string[] = [];
+  stepInput = '';
+  stepInputError = '';
 
   constructor(
     private fb: FormBuilder,
@@ -45,14 +42,10 @@ export class EditTestCaseComponent implements OnInit {
     private testCaseService: TestCaseService,
     private userStoryService: UserStoryService
   ) {
-    // Constructor body — required because tsconfig uses target: ES2022
-    // (useDefineForClassFields), which means field initialisers that
-    // reference `this.fb` execute before the property is set.
     this.form = this.fb.group({
       Title:          ['', [Validators.required, Validators.maxLength(200)]],
       Description:    [''],
       Preconditions:  [''],
-      TestSteps:      [''],
       ExpectedResult: [''],
       Priority:       [''],
       Status:         ['', Validators.required],
@@ -78,16 +71,20 @@ export class EditTestCaseComponent implements OnInit {
           Title:          tc.Title,
           Description:    tc.Description    ?? '',
           Preconditions:  tc.Preconditions  ?? '',
-          TestSteps:      tc.TestSteps      ?? '',
           ExpectedResult: tc.ExpectedResult ?? '',
           Priority:       tc.Priority       ?? '',
           Status:         tc.Status         ?? 'Open',
         });
 
-        // Store for the context strip and "Back" link
-        this.storyId = tc.StoryID;
+        // Split stored '\n'-delimited steps back into individual items,
+        // filtering empty lines that may have crept in.
+        const raw = tc.TestSteps ?? '';
+        this.stepItems = raw
+          .split('\n')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
 
-        // Fetch the story title in parallel — fail silently
+        this.storyId = tc.StoryID;
         this.userStoryService.getUserStoryById(tc.StoryID).subscribe({
           next: (story) => { this.storyTitle = story.Title; },
           error: ()     => { this.storyTitle = null; },
@@ -105,14 +102,36 @@ export class EditTestCaseComponent implements OnInit {
     });
   }
 
+  addStep(): void {
+    this.stepInputError = '';
+    const trimmed = this.stepInput.trim();
+    if (!trimmed) {
+      this.stepInputError = 'Please enter a step before adding.';
+      return;
+    }
+    this.stepItems = [...this.stepItems, trimmed];
+    this.stepInput = '';
+  }
+
+  onStepKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.addStep();
+    }
+  }
+
+  removeStep(index: number): void {
+    this.stepItems = this.stepItems.filter((_, i) => i !== index);
+  }
+
   onSubmit(): void {
     if (this.form.invalid || !this.testCaseId) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.saving     = true;
-    this.saveError  = null;
+    this.saving      = true;
+    this.saveError   = null;
     this.saveSuccess = false;
 
     const v = this.form.value;
@@ -120,7 +139,7 @@ export class EditTestCaseComponent implements OnInit {
       Title:          v.Title,
       Description:    v.Description    || null,
       Preconditions:  v.Preconditions  || null,
-      TestSteps:      v.TestSteps      || null,
+      TestSteps:      this.stepItems.length > 0 ? this.stepItems.join('\n') : null,
       ExpectedResult: v.ExpectedResult || null,
       Priority:       v.Priority       || undefined,
       Status:         v.Status,

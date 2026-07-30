@@ -12,10 +12,11 @@ type SortDir   = 'asc' | 'desc';
 /**
  * Test Cases list — the default Test Cases screen.
  * Mirrors the pattern of UserStoryListComponent:
- *  - Reachable as /test-cases (all test cases)
- *  - Reachable as /test-cases?storyId=X (scoped to one user story)
- *    The storyId comes from query params set by user-story-list when
- *    a user story row is clicked.
+ *  - Reachable as /test-cases (all test cases, via the general
+ *    searchTestCases() endpoint)
+ *  - Reachable as /test-cases?storyId=X (scoped to one user story, via the
+ *    dedicated getTestCasesByStory() endpoint). The storyId comes from
+ *    query params set by user-story-list when a user story row is clicked.
  * Clicking a row navigates to Edit Test Case (/test-cases/:id/edit).
  */
 @Component({
@@ -75,19 +76,14 @@ export class TestCaseListComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
+    // When a storyId filter is active, use the dedicated story-scoped
+    // endpoint (also verifies the story exists, giving a clearer 404).
+    // Otherwise fall back to the unfiltered/general list endpoint — same
+    // "dedicated endpoint when filtered, general endpoint otherwise" split
+    // UserStoryListComponent uses for projectId.
     const request$ = this.filteredStoryId
       ? this.testCaseService.getTestCasesByStory(this.filteredStoryId)
-      : this.testCaseService.getTestCasesByStory('');   // placeholder — see note below
-
-    // NOTE: the backend has GET /api/user-stories/:storyId/test-cases for
-    // story-scoped reads, but no "get ALL test cases" endpoint yet (there is
-    // no Search Test Case story in the backlog). When storyId is absent we
-    // show an instructional empty state rather than attempting a 404 call.
-    if (!this.filteredStoryId) {
-      this.loading = false;
-      this.testCases = [];
-      return;
-    }
+      : this.testCaseService.searchTestCases({});
 
     request$.subscribe({
       next: (cases) => {

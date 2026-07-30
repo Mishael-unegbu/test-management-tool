@@ -159,4 +159,76 @@ describe('testCasesService', () => {
       expect(await testCasesService.getAllowedStatuses(filePath)).toEqual(['Open', 'In Progress', 'Closed']);
     });
   });
+
+  describe('listTestCases', () => {
+    let storyId2;
+    let projectId2;
+
+    beforeEach(async () => {
+      const project2 = await projectsService.createProject({ projectName: 'Second Project' }, filePath);
+      projectId2 = project2.ProjectID;
+      const story2 = await userStoriesService.createUserStory(
+        { projectId: projectId2, title: 'Checkout story', createdBy: 'Bob' }, filePath
+      );
+      storyId2 = story2.StoryID;
+
+      await testCasesService.createTestCase(
+        { storyId, projectId, title: 'Login with valid creds', priority: 'P1', status: 'Open' }, filePath
+      );
+      await testCasesService.createTestCase(
+        { storyId, projectId, title: 'Login with invalid creds', priority: 'P2', status: 'Closed' }, filePath
+      );
+      await testCasesService.createTestCase(
+        { storyId: storyId2, projectId: projectId2, title: 'Checkout with coupon', priority: 'P1', status: 'Open' },
+        filePath
+      );
+    });
+
+    it('returns all test cases across all stories when no filters are given', async () => {
+      const results = await testCasesService.listTestCases({}, filePath);
+      expect(results).toHaveLength(3);
+    });
+
+    it('filters by exact storyId', async () => {
+      const results = await testCasesService.listTestCases({ storyId }, filePath);
+      expect(results).toHaveLength(2);
+      expect(results.every((tc) => tc.StoryID === storyId)).toBe(true);
+    });
+
+    it('filters by exact projectId', async () => {
+      const results = await testCasesService.listTestCases({ projectId: projectId2 }, filePath);
+      expect(results).toHaveLength(1);
+      expect(results[0].Title).toBe('Checkout with coupon');
+    });
+
+    it('filters by case-insensitive partial title match', async () => {
+      const results = await testCasesService.listTestCases({ title: 'login' }, filePath);
+      expect(results.map((tc) => tc.Title).sort()).toEqual([
+        'Login with invalid creds',
+        'Login with valid creds',
+      ]);
+    });
+
+    it('filters by exact status', async () => {
+      const results = await testCasesService.listTestCases({ status: 'Closed' }, filePath);
+      expect(results).toHaveLength(1);
+      expect(results[0].Title).toBe('Login with invalid creds');
+    });
+
+    it('filters by exact priority', async () => {
+      const results = await testCasesService.listTestCases({ priority: 'P1' }, filePath);
+      expect(results).toHaveLength(2);
+    });
+
+    it('combines filters with AND', async () => {
+      const results = await testCasesService.listTestCases({ storyId, status: 'Open' }, filePath);
+      expect(results).toHaveLength(1);
+      expect(results[0].Title).toBe('Login with valid creds');
+    });
+
+    it('returns an empty array when nothing matches', async () => {
+      const results = await testCasesService.listTestCases({ title: 'nonexistent' }, filePath);
+      expect(results).toEqual([]);
+    });
+  });
 });

@@ -80,3 +80,100 @@ button[type="submit"]:disabled {
 .loading { font-size: 14px; color: #6b7280; padding: 8px 0; }
 .success { color: #1e7e34; font-size: 14px; margin-top: 12px; }
 .error   { color: #c0392b; font-size: 14px; margin-top: 12px; }
+
+/* ── Test Steps widget ────────────────────────────────────────── */
+.steps-section {
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+
+.steps-label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #111827;
+}
+
+.steps-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.steps-input {
+  flex: 1;
+  margin-top: 0;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-weight: 400;
+  color: #1f2937;
+}
+
+.steps-add-btn {
+  padding: 8px 14px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.steps-add-btn:hover { background: #1d4ed8; }
+
+.steps-list {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  list-style: decimal;
+}
+
+.steps-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1f2937;
+}
+
+.steps-item:last-child { border-bottom: none; }
+
+.steps-text { flex: 1; line-height: 1.5; }
+
+.steps-remove-btn {
+  padding: 2px 6px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 3px;
+  color: #9ca3af;
+  font-size: 11px;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1.4;
+  margin-top: 1px;
+}
+
+.steps-remove-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.steps-empty-hint {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #9ca3af;
+  font-style: italic;
+}
+/* ─────────────────────────────────────────────────────────────── */
