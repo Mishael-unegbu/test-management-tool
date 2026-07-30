@@ -8,24 +8,33 @@ import { EditUserStoryComponent } from './components/edit-user-story/edit-user-s
 import { CreateTestCaseComponent } from './components/create-test-case/create-test-case.component';
 import { TestCaseListComponent } from './components/test-case-list/test-case-list.component';
 import { EditTestCaseComponent } from './components/edit-test-case/edit-test-case.component';
+import { ExecutionListComponent } from './components/execution-list/execution-list.component';
+import { CreateExecutionComponent } from './components/create-execution/create-execution.component';
+import { EditExecutionComponent } from './components/edit-execution/edit-execution.component';
+import { BugListComponent } from './components/bug-list/bug-list.component';
+import { CreateBugComponent } from './components/create-bug/create-bug.component';
+import { EditBugComponent } from './components/edit-bug/edit-bug.component';
 
 export const routes: Routes = [
-  // Projects table — the default screen.
+  // Projects
   { path: '', component: ProjectListComponent },
-  // US-001 Create Project
   { path: 'projects/new', component: CreateProjectComponent },
-  // US-002 Edit Project
   { path: 'projects/:id/edit', component: EditProjectComponent },
-  // User Stories table
+  // User Stories
   { path: 'user-stories', component: UserStoryListComponent },
-  // US-005 Create User Story
   { path: 'projects/:projectId/user-stories/new', component: CreateUserStoryComponent },
-  // US-006 Edit User Story
   { path: 'user-stories/:id/edit', component: EditUserStoryComponent },
-  // US-009 Create Test Case  ← storyId in the URL
+  // Test Cases
   { path: 'user-stories/:storyId/test-cases/new', component: CreateTestCaseComponent },
-  // Test Cases table (default + ?storyId=X filtered)
   { path: 'test-cases', component: TestCaseListComponent },
-  // US-010 Edit Test Case
   { path: 'test-cases/:id/edit', component: EditTestCaseComponent },
+  // Executions (US-014)
+  { path: 'executions', component: ExecutionListComponent },
+  { path: 'test-cases/:testCaseId/executions/new', component: CreateExecutionComponent },
+  { path: 'executions/:id/edit', component: EditExecutionComponent },
+  // Bugs (US-016, US-017, US-019)
+  { path: 'bugs', component: BugListComponent },
+  { path: 'executions/:executionId/bugs/new', component: CreateBugComponent },
+  { path: 'test-cases/:testCaseId/bugs/new', component: CreateBugComponent },
+  { path: 'bugs/:id/edit', component: EditBugComponent },
 ];

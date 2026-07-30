@@ -19,7 +19,7 @@
     <div class="card-banner">
       <h2 *ngIf="!filteredStoryId">Test Cases</h2>
       <h2 *ngIf="filteredStoryId">Test Cases for {{ filteredStoryTitle || 'Story ' + filteredStoryId }}</h2>
-      <p class="banner-hint">Click any row to edit the test case</p>
+      <p class="banner-hint">Click any row to view its executions &bull; Use the Edit button to edit the test case</p>
     </div>
 
     <div class="loading" *ngIf="loading">Loading test cases&hellip;</div>

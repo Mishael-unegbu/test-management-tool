@@ -1,0 +1,86 @@
+<div class="create-bug-card">
+  <div class="card-header">
+    <h2>Report Bug</h2>
+    <a [routerLink]="backLink" [queryParams]="backQueryParams" class="back-link">&larr; Back to Bugs</a>
+  </div>
+
+  <p *ngIf="testCaseTitle" class="context-strip">
+    Test case: <strong>{{ testCaseTitle }}</strong> (ID {{ testCaseId }})
+    <span *ngIf="executionId" class="exec-tag"> &bull; Execution #{{ executionId }}</span>
+  </p>
+  <div *ngIf="contextLoadError" class="error" role="alert">{{ contextLoadError }}</div>
+
+  <form *ngIf="!contextLoadError" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+    <label>
+      Title *
+      <input type="text" formControlName="title" placeholder="Brief summary of the bug" />
+    </label>
+    <div class="field-error" *ngIf="form.get('title')?.touched && form.get('title')?.invalid">
+      Title is required.
+    </div>
+
+    <label>
+      Reporter *
+      <input type="text" formControlName="reporter" placeholder="Your name" />
+    </label>
+    <div class="field-error" *ngIf="form.get('reporter')?.touched && form.get('reporter')?.invalid">
+      Reporter is required.
+    </div>
+
+    <div class="field-row">
+      <label>
+        Severity
+        <select formControlName="severity">
+          <option value="">(none)</option>
+          <option *ngFor="let s of severityOptions" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label>
+        Priority
+        <select formControlName="priority">
+          <option value="">(none)</option>
+          <option *ngFor="let p of priorityOptions" [value]="p">{{ p }}</option>
+        </select>
+      </label>
+      <label>
+        Status
+        <select formControlName="status">
+          <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+    </div>
+
+    <label>
+      Description
+      <textarea formControlName="description" rows="3" placeholder="Optional description"></textarea>
+    </label>
+
+    <label>
+      Steps to Reproduce
+      <textarea formControlName="stepsToReproduce" rows="4"
+                placeholder="1. Go to…&#10;2. Click on…&#10;3. Observe…"></textarea>
+    </label>
+
+    <div class="field-row">
+      <label>
+        Expected Result
+        <textarea formControlName="expectedResult" rows="2" placeholder="What should happen"></textarea>
+      </label>
+      <label>
+        Actual Result
+        <textarea formControlName="actualResult" rows="2" placeholder="What actually happened"></textarea>
+      </label>
+    </div>
+
+    <button type="submit" [disabled]="submitting">
+      {{ submitting ? 'Reporting…' : 'Report Bug' }}
+    </button>
+
+    <p class="success" *ngIf="successMessage">
+      {{ successMessage }}
+      <a *ngIf="createdBugId" [routerLink]="['/bugs', createdBugId, 'edit']">Edit it</a>
+    </p>
+    <p class="error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+  </form>
+</div>

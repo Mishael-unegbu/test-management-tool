@@ -1,0 +1,70 @@
+<div class="edit-exec-card">
+  <div class="card-header">
+    <h2>Edit Execution</h2>
+    <a *ngIf="testCaseId"
+       [routerLink]="['/executions']"
+       [queryParams]="{ testCaseId: testCaseId }"
+       class="back-link">&larr; Back to Executions</a>
+    <a *ngIf="!testCaseId" routerLink="/executions" class="back-link">&larr; Back</a>
+  </div>
+
+  <p *ngIf="testCaseTitle" class="tc-context">
+    Test case: <strong>{{ testCaseTitle }}</strong> (ID {{ testCaseId }})
+  </p>
+
+  <div *ngIf="loading" class="loading">Loading execution&hellip;</div>
+  <div *ngIf="loadError" class="error" role="alert">{{ loadError }}</div>
+
+  <form *ngIf="!loading && !loadError" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <div class="field-row">
+      <label>
+        Result *
+        <select formControlName="Status">
+          <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label>
+        Executed By *
+        <input type="text" formControlName="ExecutedBy" />
+      </label>
+    </div>
+    <div class="field-error" *ngIf="form.get('ExecutedBy')?.touched && form.get('ExecutedBy')?.invalid">
+      Executed By is required.
+    </div>
+
+    <div class="field-row">
+      <label>
+        Build Version
+        <input type="text" formControlName="BuildVersion" placeholder="e.g. 2.1.0" />
+      </label>
+      <label>
+        Environment
+        <input type="text" formControlName="Environment" placeholder="e.g. Staging, UAT" />
+      </label>
+    </div>
+
+    <label>
+      Actual Result
+      <textarea formControlName="ActualResult" rows="3"
+                placeholder="What actually happened?"></textarea>
+    </label>
+
+    <label>
+      Notes
+      <textarea formControlName="Notes" rows="2"></textarea>
+    </label>
+
+    <label>
+      Linked Bug ID
+      <input type="number" formControlName="LinkedBugID" placeholder="Bug ID (if failed)" />
+    </label>
+
+    <button type="submit" [disabled]="saving">
+      {{ saving ? 'Saving&hellip;' : 'Save Changes' }}
+    </button>
+
+    <p class="success" *ngIf="saveSuccess">Execution updated successfully.</p>
+    <p class="error"   *ngIf="saveError" role="alert">{{ saveError }}</p>
+  </form>
+</div>

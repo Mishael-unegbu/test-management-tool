@@ -1,0 +1,92 @@
+<div class="page">
+
+  <div class="toolbar">
+    <h1 class="page-title">Executions</h1>
+
+    <form class="filters" [formGroup]="filterForm" (ngSubmit)="load()">
+      <select formControlName="status" class="filter-select" (change)="load()">
+        <option value="">Status (all)</option>
+        <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+      </select>
+      <input type="text" formControlName="executedBy" placeholder="Executed by…" class="keyword-input" />
+      <button type="submit" class="apply-btn">Search</button>
+    </form>
+
+    <a *ngIf="filteredTestCaseId"
+       [routerLink]="['/test-cases', filteredTestCaseId, 'executions', 'new']"
+       class="add-btn">+ Log Execution</a>
+    <span *ngIf="!filteredTestCaseId" class="add-btn-disabled"
+          title="Select a test case to log an execution">+ Log Execution</span>
+  </div>
+
+  <div class="filter-banner" *ngIf="filteredTestCaseId">
+    Showing executions for <strong>{{ filteredTestCaseTitle || 'Test Case ' + filteredTestCaseId }}</strong> (ID&nbsp;{{ filteredTestCaseId }}).
+    <a class="clear-filter-link" (click)="clearTestCaseFilter()">Clear filter</a>
+  </div>
+
+  <div class="card">
+    <div class="card-banner">
+      <h2 *ngIf="!filteredTestCaseId">Executions &ndash; Full List</h2>
+      <h2 *ngIf="filteredTestCaseId">Executions for {{ filteredTestCaseTitle || 'Test Case ' + filteredTestCaseId }}</h2>
+      <p class="banner-hint">Click any row to view its bugs &bull; Use the Edit button to edit the execution</p>
+    </div>
+
+    <div class="loading" *ngIf="loading">Loading executions&hellip;</div>
+    <div class="error-msg" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <!-- No filter selected -->
+    <div class="empty" *ngIf="!loading && !errorMessage && !filteredTestCaseId && executions.length === 0">
+      <p>Select a test case to see its executions, or use the filters above.</p>
+      <a routerLink="/test-cases" class="add-btn">Go to Test Cases</a>
+    </div>
+
+    <!-- Filter active but no results -->
+    <div class="empty" *ngIf="!loading && !errorMessage && filteredTestCaseId && executions.length === 0">
+      <p>No executions logged for this test case yet.</p>
+      <a [routerLink]="['/test-cases', filteredTestCaseId, 'executions', 'new']" class="add-btn">
+        + Log First Execution
+      </a>
+    </div>
+
+    <table class="exec-table" *ngIf="!loading && !errorMessage && executions.length > 0">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="sortable" (click)="sortBy('TestCaseID')">TC ID <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('TestCaseTitle')">Test Case <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('Status')">Result <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('ExecutedBy')">Executed By <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('ExecutionDate')">Date <span class="sort-arrows">&#8597;</span></th>
+          <th>Build</th>
+          <th>Env</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ex of executions; let i = index"
+            class="clickable-row"
+            (click)="navigateToEdit(ex.ExecutionID)"
+            title="Edit execution #{{ ex.ExecutionID }}">
+          <td class="col-num">{{ i + 1 }}.</td>
+          <td>{{ ex.TestCaseID }}</td>
+          <td class="col-title">
+            <span class="tc-name">{{ ex.TestCaseTitle || '—' }}</span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="statusClass(ex.Status)">{{ ex.Status }}</span>
+          </td>
+          <td>{{ ex.ExecutedBy || '—' }}</td>
+          <td class="col-date">{{ formatDate(ex.ExecutionDate) }}</td>
+          <td>{{ ex.BuildVersion || '—' }}</td>
+          <td>{{ ex.Environment || '—' }}</td>
+          <td class="col-action">
+            <a [routerLink]="['/executions', ex.ExecutionID, 'edit']"
+               class="edit-btn"
+               (click)="$event.stopPropagation()">Edit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

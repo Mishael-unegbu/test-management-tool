@@ -1,0 +1,93 @@
+<div class="page">
+
+  <div class="toolbar">
+    <h1 class="page-title">Bugs</h1>
+
+    <form class="filters" [formGroup]="filterForm" (ngSubmit)="load()">
+      <input type="text" formControlName="title" placeholder="Search title…" class="keyword-input" />
+      <select formControlName="severity" class="filter-select" (change)="load()">
+        <option value="">Severity (all)</option>
+        <option *ngFor="let s of severityOptions" [value]="s">{{ s }}</option>
+      </select>
+      <select formControlName="status" class="filter-select" (change)="load()">
+        <option value="">Status (all)</option>
+        <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+      </select>
+      <button type="submit" class="apply-btn">Search</button>
+    </form>
+
+    <a *ngIf="reportBugLink" [routerLink]="reportBugLink" class="add-btn">+ Report Bug</a>
+    <span *ngIf="!reportBugLink" class="add-btn-disabled" title="Select an execution or test case to report a bug">+ Report Bug</span>
+  </div>
+
+  <div class="filter-banner" *ngIf="filteredExecutionId || filteredTestCaseId">
+    Showing bugs for <strong>{{ contextLabel || (filteredExecutionId ? 'Execution ' + filteredExecutionId : 'Test Case ' + filteredTestCaseId) }}</strong>.
+    <a class="clear-filter-link" (click)="clearFilter()">Clear filter</a>
+  </div>
+
+  <div class="card">
+    <div class="card-banner">
+      <h2 *ngIf="!filteredExecutionId && !filteredTestCaseId">Bugs &ndash; Full List</h2>
+      <h2 *ngIf="filteredExecutionId || filteredTestCaseId">
+        Bugs for {{ contextLabel || (filteredExecutionId ? 'Execution ' + filteredExecutionId : 'Test Case ' + filteredTestCaseId) }}
+      </h2>
+      <p class="banner-hint">Click any row to edit the bug record &bull; Use the Edit button for quick access</p>
+    </div>
+
+    <div class="loading" *ngIf="loading">Loading bugs&hellip;</div>
+    <div class="error-msg" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <div class="empty" *ngIf="!loading && !errorMessage && bugs.length === 0">
+      <p *ngIf="!filteredExecutionId && !filteredTestCaseId">No bugs found. Filter by execution or test case to narrow results.</p>
+      <p *ngIf="filteredExecutionId || filteredTestCaseId">No bugs reported yet.</p>
+      <a *ngIf="reportBugLink" [routerLink]="reportBugLink" class="add-btn">+ Report First Bug</a>
+    </div>
+
+    <table class="bug-table" *ngIf="!loading && !errorMessage && bugs.length > 0">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="sortable" (click)="sortBy('TestCaseID')">TC ID <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('TestCaseTitle')">Test Case <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('Title')">Title <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('Severity')">Severity <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('Priority')">Priority <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('Status')">Status <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('Reporter')">Reporter <span class="sort-arrows">&#8597;</span></th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bug of bugs; let i = index"
+            class="clickable-row"
+            (click)="navigateToEdit(bug.BugID)"
+            title="Edit bug #{{ bug.BugID }}">
+          <td class="col-num">{{ i + 1 }}.</td>
+          <td>{{ bug.TestCaseID }}</td>
+          <td class="col-tc"><span class="tc-name">{{ bug.TestCaseTitle || '—' }}</span></td>
+          <td class="col-title"><span class="bug-title">{{ bug.Title }}</span></td>
+          <td>
+            <span class="severity-badge" [ngClass]="severityClass(bug.Severity)">
+              {{ bug.Severity || '—' }}
+            </span>
+          </td>
+          <td>
+            <span class="priority" [ngClass]="priorityClass(bug.Priority)">
+              {{ bug.Priority || '—' }}
+            </span>
+          </td>
+          <td>
+            <span class="status" [ngClass]="statusClass(bug.Status)">{{ bug.Status }}</span>
+          </td>
+          <td>{{ bug.Reporter || '—' }}</td>
+          <td class="col-action">
+            <a [routerLink]="['/bugs', bug.BugID, 'edit']"
+               class="edit-btn"
+               (click)="$event.stopPropagation()">Edit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

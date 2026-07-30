@@ -99,7 +99,7 @@ export class TestCaseListComponent implements OnInit {
   }
 
   navigateToEdit(testCaseId: number): void {
-    this.router.navigate(['/test-cases', testCaseId, 'edit']);
+    this.router.navigate(['/executions'], { queryParams: { testCaseId } });
   }
 
   sortBy(field: SortField): void {

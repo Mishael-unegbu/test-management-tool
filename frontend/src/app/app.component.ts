@@ -12,6 +12,8 @@ import { RouterLink, RouterOutlet } from '@angular/router';
         <a routerLink="/" style="color: #cbd5e1; text-decoration: none; font-size: 14px;">Projects</a>
         <a routerLink="/user-stories" style="color: #cbd5e1; text-decoration: none; font-size: 14px;">User Stories</a>
         <a routerLink="/test-cases" style="color: #cbd5e1; text-decoration: none; font-size: 14px;">Test Cases</a>
+        <a routerLink="/executions" style="color: #cbd5e1; text-decoration: none; font-size: 14px;">Executions</a>
+        <a routerLink="/bugs" style="color: #cbd5e1; text-decoration: none; font-size: 14px;">Bugs</a>
       </nav>
     </header>
     <main>

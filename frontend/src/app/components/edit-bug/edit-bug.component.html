@@ -1,0 +1,80 @@
+<div class="edit-bug-card">
+  <div class="card-header">
+    <h2>Edit Bug</h2>
+    <a routerLink="/bugs" class="back-link">&larr; Back to Bugs</a>
+  </div>
+
+  <div class="context-strip" *ngIf="testCaseTitle">
+    <span>Test case: <strong>{{ testCaseTitle }}</strong> (ID {{ testCaseId }})</span>
+    <span *ngIf="executionId" class="exec-tag"> &bull; Execution #{{ executionId }}</span>
+    <span *ngIf="reporter" class="reporter-tag"> &bull; Reported by {{ reporter }}</span>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading bug&hellip;</div>
+  <div *ngIf="loadError" class="error" role="alert">{{ loadError }}</div>
+
+  <form *ngIf="!loading && !loadError" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <label>
+      Title *
+      <input type="text" formControlName="Title" />
+    </label>
+    <div class="field-error" *ngIf="form.get('Title')?.touched && form.get('Title')?.invalid">
+      Title is required.
+    </div>
+
+    <div class="field-row">
+      <label>
+        Severity
+        <select formControlName="Severity">
+          <option value="">(none)</option>
+          <option *ngFor="let s of severityOptions" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label>
+        Priority
+        <select formControlName="Priority">
+          <option value="">(none)</option>
+          <option *ngFor="let p of priorityOptions" [value]="p">{{ p }}</option>
+        </select>
+      </label>
+      <label>
+        Status *
+        <select formControlName="Status">
+          <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+    </div>
+    <div class="field-error" *ngIf="form.get('Status')?.touched && form.get('Status')?.invalid">
+      Status is required.
+    </div>
+
+    <label>
+      Description
+      <textarea formControlName="Description" rows="3"></textarea>
+    </label>
+
+    <label>
+      Steps to Reproduce
+      <textarea formControlName="StepsToReproduce" rows="4"></textarea>
+    </label>
+
+    <div class="field-row">
+      <label>
+        Expected Result
+        <textarea formControlName="ExpectedResult" rows="2"></textarea>
+      </label>
+      <label>
+        Actual Result
+        <textarea formControlName="ActualResult" rows="2"></textarea>
+      </label>
+    </div>
+
+    <button type="submit" [disabled]="saving">
+      {{ saving ? 'Saving&hellip;' : 'Save Changes' }}
+    </button>
+
+    <p class="success" *ngIf="saveSuccess">Bug updated successfully.</p>
+    <p class="error"   *ngIf="saveError" role="alert">{{ saveError }}</p>
+  </form>
+</div>

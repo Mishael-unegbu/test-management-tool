@@ -1,0 +1,73 @@
+<div class="create-exec-card">
+  <div class="card-header">
+    <h2>Log Test Execution</h2>
+    <a *ngIf="testCaseId"
+       [routerLink]="['/executions']"
+       [queryParams]="{ testCaseId: testCaseId }"
+       class="back-link">&larr; Back to Executions</a>
+    <a *ngIf="!testCaseId" routerLink="/executions" class="back-link">&larr; Back</a>
+  </div>
+
+  <p *ngIf="testCaseTitle" class="tc-context">
+    Test case: <strong>{{ testCaseTitle }}</strong> (ID {{ testCaseId }})
+  </p>
+  <div *ngIf="testCaseLoadError" class="error" role="alert">{{ testCaseLoadError }}</div>
+
+  <form *ngIf="!testCaseLoadError" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+    <div class="field-row">
+      <label>
+        Result *
+        <select formControlName="status">
+          <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label>
+        Executed By *
+        <input type="text" formControlName="executedBy" placeholder="Your name" />
+      </label>
+    </div>
+    <div class="field-error" *ngIf="form.get('executedBy')?.touched && form.get('executedBy')?.invalid">
+      Executed By is required.
+    </div>
+
+    <div class="field-row">
+      <label>
+        Build Version
+        <input type="text" formControlName="buildVersion" placeholder="e.g. 2.1.0" />
+      </label>
+      <label>
+        Environment
+        <input type="text" formControlName="environment" placeholder="e.g. Staging, UAT" />
+      </label>
+    </div>
+
+    <label>
+      Actual Result
+      <textarea formControlName="actualResult" rows="3"
+                placeholder="What actually happened when you ran this test?"></textarea>
+    </label>
+
+    <label>
+      Notes
+      <textarea formControlName="notes" rows="2"
+                placeholder="Any additional observations or context"></textarea>
+    </label>
+
+    <label>
+      Linked Bug ID
+      <input type="number" formControlName="linkedBugId" placeholder="Bug ID if this execution failed" />
+    </label>
+
+    <button type="submit" [disabled]="submitting">
+      {{ submitting ? 'Logging…' : 'Log Execution' }}
+    </button>
+
+    <p class="success" *ngIf="successMessage">
+      {{ successMessage }}
+      <a *ngIf="createdExecutionId"
+         [routerLink]="['/executions', createdExecutionId, 'edit']">Edit it</a>
+    </p>
+    <p class="error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+  </form>
+</div>
