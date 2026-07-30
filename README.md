@@ -51,8 +51,16 @@ npm start
 
 Runs on `http://localhost:4200` (Angular dev server) and calls the backend at `http://localhost:3000/api`.
 
-Implements the "Create Project" form (`app-create-project` standalone component) calling `POST /api/projects`.
-(UI for Edit Project / View Project hasn't been built yet — backend only, so far.)
+Screens (all standalone components):
+- `/` — Create Project (`app-create-project`) → `POST /api/projects`
+- `/projects/:id/edit` — Edit Project (`app-edit-project`) → `GET`/`PUT /api/projects/:id`
+- `/test-cases` — **US-016 View Test Cases** (`app-test-case-list`) → `GET /api/test-cases`, or
+  `GET /api/user-stories/:storyId/test-cases` when a `?storyId=` query param is present
+- `/test-cases/:id/edit` — **US-017 Edit Test Case** (`app-edit-test-case`) → `GET`/`PUT /api/test-cases/:id`
+
+The test case screens also read `GET /api/user-stories/:id` for the story title shown in the
+banner / story context line. Those endpoints, and the whole TestCases resource, still need to be
+implemented on the backend.
 
 ## Known `npm audit` findings (backend)
 

@@ -4,17 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ProjectService } from '../../services/project.service';
 import { Project, PROJECT_STATUSES } from '../../models/project.model';
-
-/** Extracts a human-readable message from either backend error shape:
- *  - validation failures: { errors: string[] }        (400, from the validator)
- *  - service-level failures: { error: string }         (409 / 500)
- */
-function extractErrorMessage(err: unknown, fallback: string): string {
-  const body = (err as { error?: { errors?: string[]; error?: string } })?.error;
-  if (body?.errors?.length) return body.errors.join(' ');
-  if (body?.error) return body.error;
-  return fallback;
-}
+import { extractErrorMessage } from '../../shared/http-error.util';
 
 /**
  * US-001 Create Project
