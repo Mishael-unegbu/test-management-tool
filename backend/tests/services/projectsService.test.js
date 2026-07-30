@@ -96,9 +96,13 @@ describe('projectsService', () => {
   });
 
   describe('getAllowedStatuses', () => {
+    // Not used for Project validation (see the function's doc comment) —
+    // this only confirms the read mechanics still work. The fixture now
+    // matches the real Settings sheet's Status rows (Open/In Progress/
+    // Closed), which are Bug/UserStory statuses, not Project statuses.
     it('reads Status values from the Settings sheet', async () => {
       const statuses = await projectsService.getAllowedStatuses(filePath);
-      expect(statuses).toEqual(['Active', 'On Hold', 'Completed']);
+      expect(statuses).toEqual(['Open', 'In Progress', 'Closed']);
     });
   });
 });
