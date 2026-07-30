@@ -1,10 +1,13 @@
 <div class="create-project-card">
-  <h2>Create Project</h2>
+  <div class="card-header">
+    <h2>Create Project</h2>
+    <a class="back-link" routerLink="/">Back to Projects</a>
+  </div>
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <label>
       Project Name *
-      <input type="text" formControlName="projectName" placeholder="e.g. QA Management Tool" />
+      <input type="text" formControlName="projectName" />
     </label>
     <div class="field-error" *ngIf="form.get('projectName')?.touched && form.get('projectName')?.invalid">
       Project name is required.
@@ -12,7 +15,7 @@
 
     <label>
       Description
-      <textarea formControlName="description" rows="3" placeholder="Optional description"></textarea>
+      <textarea formControlName="description" rows="3"></textarea>
     </label>
 
     <label>
@@ -34,13 +37,13 @@
     </div>
 
     <button type="submit" [disabled]="submitting">
-      {{ submitting ? 'Creating...' : 'Create Project' }}
+      {{ submitting ? 'Creating…' : 'Create Project' }}
     </button>
 
     <p class="success" *ngIf="successMessage">
       {{ successMessage }}
       <a *ngIf="createdProjectId" [routerLink]="['/projects', createdProjectId, 'edit']">Edit it</a>
     </p>
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
   </form>
 </div>

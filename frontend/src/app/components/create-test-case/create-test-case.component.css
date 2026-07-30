@@ -1,4 +1,4 @@
-.create-project-card {
+.create-test-case-card {
   max-width: 480px;
   margin: 40px auto;
   padding: 24px;
@@ -28,6 +28,12 @@
   text-decoration: underline;
 }
 
+.story-context {
+  font-size: 13px;
+  color: #555;
+  margin: -6px 0 16px;
+}
+
 label {
   display: block;
   margin-bottom: 14px;
@@ -49,12 +55,12 @@ select {
   font-weight: 400;
 }
 
-.date-row {
+.field-row {
   display: flex;
   gap: 16px;
 }
 
-.date-row label {
+.field-row label {
   flex: 1;
 }
 

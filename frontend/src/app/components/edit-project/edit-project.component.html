@@ -48,5 +48,9 @@
 
     <p class="success" *ngIf="saveSuccess">Project updated successfully.</p>
     <p class="error" *ngIf="saveError" role="alert">{{ saveError }}</p>
+
+    <p class="secondary-action">
+      <a [routerLink]="['/projects', projectId, 'user-stories', 'new']">+ Add a user story to this project</a>
+    </p>
   </form>
 </div>

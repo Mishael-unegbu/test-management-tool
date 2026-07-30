@@ -1,0 +1,90 @@
+<div class="create-user-story-card">
+  <div class="card-header">
+    <h2>Create User Story</h2>
+    <a routerLink="/user-stories" class="back-link">&larr; Back to User Stories</a>
+  </div>
+
+  <p *ngIf="projectName" class="project-context">
+    Under project: <strong>{{ projectName }}</strong> (ID {{ projectId }})
+  </p>
+  <div *ngIf="projectLoadError" class="error" role="alert">{{ projectLoadError }}</div>
+
+  <form *ngIf="!projectLoadError" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+    <label>
+      Title *
+      <input type="text" formControlName="title" placeholder="e.g. As a user, I want to log in" />
+    </label>
+    <div class="field-error" *ngIf="form.get('title')?.touched && form.get('title')?.invalid">
+      Title is required.
+    </div>
+
+    <label>
+      Description
+      <textarea formControlName="description" rows="3" placeholder="Optional description"></textarea>
+    </label>
+
+    <!-- ── Acceptance Criteria ──────────────────────────────────── -->
+    <div class="ac-section">
+      <span class="ac-label">Acceptance Criteria</span>
+
+      <div class="ac-input-row">
+        <input
+          type="text"
+          class="ac-input"
+          [(ngModel)]="acInput"
+          [ngModelOptions]="{ standalone: true }"
+          (keydown)="onAcKeydown($event)"
+          placeholder="Type a criterion and click Add"
+        />
+        <button type="button" class="ac-add-btn" (click)="addAc()">+ Add</button>
+      </div>
+      <div class="field-error" *ngIf="acInputError">{{ acInputError }}</div>
+
+      <ol class="ac-list" *ngIf="acItems.length > 0">
+        <li *ngFor="let item of acItems; let i = index" class="ac-item">
+          <span class="ac-text">{{ item }}</span>
+          <button type="button" class="ac-remove-btn" (click)="removeAc(i)" title="Remove">&#10005;</button>
+        </li>
+      </ol>
+      <p class="ac-empty-hint" *ngIf="acItems.length === 0">
+        No criteria added yet. Add at least one if this story has acceptance criteria.
+      </p>
+    </div>
+    <!-- ────────────────────────────────────────────────────────── -->
+
+    <div class="field-row">
+      <label>
+        Priority
+        <select formControlName="priority">
+          <option value="">(none)</option>
+          <option *ngFor="let priority of allowedPriorities" [value]="priority">{{ priority }}</option>
+        </select>
+      </label>
+      <label>
+        Status
+        <select formControlName="status">
+          <option *ngFor="let status of allowedStatuses" [value]="status">{{ status }}</option>
+        </select>
+      </label>
+    </div>
+
+    <label>
+      Created By *
+      <input type="text" formControlName="createdBy" placeholder="Your name" />
+    </label>
+    <div class="field-error" *ngIf="form.get('createdBy')?.touched && form.get('createdBy')?.invalid">
+      Created By is required.
+    </div>
+
+    <button type="submit" [disabled]="submitting">
+      {{ submitting ? 'Creating...' : 'Create User Story' }}
+    </button>
+
+    <p class="success" *ngIf="successMessage">
+      {{ successMessage }}
+      <a *ngIf="createdStoryId" [routerLink]="['/user-stories', createdStoryId, 'edit']">Edit it</a>
+    </p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+  </form>
+</div>

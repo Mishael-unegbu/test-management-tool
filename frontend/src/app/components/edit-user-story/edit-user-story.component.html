@@ -1,0 +1,75 @@
+<div class="edit-user-story-card">
+  <h2>Edit User Story</h2>
+
+  <div *ngIf="loading" class="loading">Loading user story…</div>
+  <div *ngIf="loadError" class="error" role="alert">{{ loadError }}</div>
+
+  <form *ngIf="!loading && !loadError" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <label>
+      Title *
+      <input type="text" formControlName="Title" />
+    </label>
+    <div class="field-error" *ngIf="form.get('Title')?.touched && form.get('Title')?.invalid">
+      Title is required.
+    </div>
+
+    <label>
+      Description
+      <textarea formControlName="Description" rows="3"></textarea>
+    </label>
+
+    <!-- ── Acceptance Criteria ──────────────────────────────────── -->
+    <div class="ac-section">
+      <span class="ac-label">Acceptance Criteria</span>
+
+      <div class="ac-input-row">
+        <input
+          type="text"
+          class="ac-input"
+          [(ngModel)]="acInput"
+          [ngModelOptions]="{ standalone: true }"
+          (keydown)="onAcKeydown($event)"
+          placeholder="Type a criterion and click Add"
+        />
+        <button type="button" class="ac-add-btn" (click)="addAc()">+ Add</button>
+      </div>
+      <div class="field-error" *ngIf="acInputError">{{ acInputError }}</div>
+
+      <ol class="ac-list" *ngIf="acItems.length > 0">
+        <li *ngFor="let item of acItems; let i = index" class="ac-item">
+          <span class="ac-text">{{ item }}</span>
+          <button type="button" class="ac-remove-btn" (click)="removeAc(i)" title="Remove">&#10005;</button>
+        </li>
+      </ol>
+      <p class="ac-empty-hint" *ngIf="acItems.length === 0">
+        No criteria added yet.
+      </p>
+    </div>
+    <!-- ────────────────────────────────────────────────────────── -->
+
+    <div class="field-row">
+      <label>
+        Priority
+        <select formControlName="Priority">
+          <option value="">(none)</option>
+          <option *ngFor="let priority of allowedPriorities" [value]="priority">{{ priority }}</option>
+        </select>
+      </label>
+      <label>
+        Status *
+        <select formControlName="Status">
+          <option *ngFor="let status of allowedStatuses" [value]="status">{{ status }}</option>
+        </select>
+      </label>
+    </div>
+    <div class="field-error" *ngIf="form.get('Status')?.touched && form.get('Status')?.invalid">
+      Status is required.
+    </div>
+
+    <button type="submit" [disabled]="saving">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
+
+    <p class="success" *ngIf="saveSuccess">User story updated successfully.</p>
+    <p class="error" *ngIf="saveError" role="alert">{{ saveError }}</p>
+  </form>
+</div>

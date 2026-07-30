@@ -39,3 +39,9 @@ export interface ProjectEditPayload {
 // which live under the same Settings sheet "Status" SettingType but are not
 // valid values here. See that file's doc comment for the full history.
 export const PROJECT_STATUSES = ['Active', 'On Hold', 'Completed'] as const;
+
+// Optional filters for the Projects table view (list all / filter).
+export interface ProjectListFilters {
+  projectName?: string;
+  status?: string;
+}

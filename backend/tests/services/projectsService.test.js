@@ -51,15 +51,13 @@ describe('projectsService', () => {
     it('updates only the provided editable fields', async () => {
       await projectsService.createProject({ projectName: 'Alpha', description: 'Original' }, filePath);
       const updated = await projectsService.updateProject(1, { Description: 'Updated' }, filePath);
-
       expect(updated.Description).toBe('Updated');
-      expect(updated.ProjectName).toBe('Alpha'); // untouched
+      expect(updated.ProjectName).toBe('Alpha');
     });
 
     it('never changes ProjectID or CreatedDate', async () => {
       const created = await projectsService.createProject({ projectName: 'Alpha' }, filePath);
       const updated = await projectsService.updateProject(1, { Status: 'On Hold' }, filePath);
-
       expect(updated.ProjectID).toBe(created.ProjectID);
       expect(updated.CreatedDate).toBe(created.CreatedDate);
     });
@@ -72,7 +70,6 @@ describe('projectsService', () => {
     it('rejects renaming a project to another existing project\'s name (case-insensitive)', async () => {
       await projectsService.createProject({ projectName: 'Alpha' }, filePath);
       await projectsService.createProject({ projectName: 'Beta' }, filePath);
-
       await expect(
         projectsService.updateProject(2, { ProjectName: 'alpha' }, filePath)
       ).rejects.toMatchObject({ statusCode: 409 });
@@ -96,9 +93,42 @@ describe('projectsService', () => {
   });
 
   describe('getAllowedStatuses', () => {
+    // The fixture now matches the real Settings sheet (Open/In Progress/Closed).
+    // These are Bug/UserStory statuses, NOT Project statuses — see
+    // projectsService.getAllowedStatuses()'s doc comment.
     it('reads Status values from the Settings sheet', async () => {
       const statuses = await projectsService.getAllowedStatuses(filePath);
-      expect(statuses).toEqual(['Active', 'On Hold', 'Completed']);
+      expect(statuses).toEqual(['Open', 'In Progress', 'Closed']);
+    });
+  });
+
+  describe('listProjects', () => {
+    beforeEach(async () => {
+      await projectsService.createProject({ projectName: 'Alpha Project', status: 'Active' }, filePath);
+      await projectsService.createProject({ projectName: 'Beta Project', status: 'On Hold' }, filePath);
+      await projectsService.createProject({ projectName: 'Gamma Initiative', status: 'Completed' }, filePath);
+    });
+
+    it('returns all projects when no filters are given', async () => {
+      const results = await projectsService.listProjects({}, filePath);
+      expect(results).toHaveLength(3);
+    });
+
+    it('filters by case-insensitive partial projectName match', async () => {
+      const results = await projectsService.listProjects({ projectName: 'project' }, filePath);
+      expect(results.map((p) => p.ProjectName).sort()).toEqual(['Alpha Project', 'Beta Project']);
+    });
+
+    it('filters by exact status', async () => {
+      const results = await projectsService.listProjects({ status: 'On Hold' }, filePath);
+      expect(results).toHaveLength(1);
+      expect(results[0].ProjectName).toBe('Beta Project');
+    });
+
+    it('combines filters with AND', async () => {
+      const results = await projectsService.listProjects({ projectName: 'project', status: 'Active' }, filePath);
+      expect(results).toHaveLength(1);
+      expect(results[0].ProjectName).toBe('Alpha Project');
     });
   });
 });

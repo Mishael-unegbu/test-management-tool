@@ -1,0 +1,96 @@
+<div class="page">
+
+  <div class="toolbar">
+    <h1 class="page-title">Test Cases</h1>
+
+    <a *ngIf="filteredStoryId"
+       [routerLink]="['/user-stories', filteredStoryId, 'test-cases', 'new']"
+       class="add-btn">+ Add Test Case</a>
+    <span *ngIf="!filteredStoryId" class="add-btn-disabled"
+          title="Select a user story first to add a test case">+ Add Test Case</span>
+  </div>
+
+  <div class="filter-banner" *ngIf="filteredStoryId">
+    Showing test cases for <strong>{{ filteredStoryTitle || 'Story ' + filteredStoryId }}</strong>.
+    <a class="clear-filter-link" (click)="clearStoryFilter()">Clear filter</a>
+  </div>
+
+  <div class="card">
+    <div class="card-banner">
+      <h2 *ngIf="!filteredStoryId">Test Cases</h2>
+      <h2 *ngIf="filteredStoryId">Test Cases for {{ filteredStoryTitle || 'Story ' + filteredStoryId }}</h2>
+      <p class="banner-hint">Click any row to edit the test case</p>
+    </div>
+
+    <div class="loading" *ngIf="loading">Loading test cases&hellip;</div>
+    <div class="error-msg" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <!-- No story selected -->
+    <div class="empty" *ngIf="!loading && !errorMessage && !filteredStoryId">
+      <p>Select a user story to see its test cases.</p>
+      <a routerLink="/user-stories" class="add-btn">Go to User Stories</a>
+    </div>
+
+    <!-- Story selected but no test cases yet -->
+    <div class="empty" *ngIf="!loading && !errorMessage && filteredStoryId && testCases.length === 0">
+      <p>No test cases for this story yet.</p>
+      <a [routerLink]="['/user-stories', filteredStoryId, 'test-cases', 'new']" class="add-btn">
+        + Add Test Case
+      </a>
+    </div>
+
+    <table class="tc-table" *ngIf="!loading && !errorMessage && testCases.length > 0">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="sortable" (click)="sortBy('Title')">
+            Title <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th class="sortable" (click)="sortBy('StoryID')">
+            Story <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th class="sortable" (click)="sortBy('ProjectID')">
+            Project <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th class="sortable" (click)="sortBy('Status')">
+            Status <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th class="sortable" (click)="sortBy('Priority')">
+            Priority <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tc of testCases; let i = index"
+            class="clickable-row"
+            (click)="navigateToEdit(tc.TestCaseID)"
+            title="Edit: {{ tc.Title }}">
+          <td class="col-num">{{ i + 1 }}.</td>
+          <td class="col-title">
+            <span class="avatar" [style.background]="avatarColorFor(tc.Title)">
+              {{ initialFor(tc.Title) }}
+            </span>
+            <span class="tc-name">{{ tc.Title }}</span>
+          </td>
+          <td>{{ tc.StoryID }}</td>
+          <td>{{ tc.ProjectID }}</td>
+          <td>
+            <span class="status" [ngClass]="statusClass(tc.Status)">{{ tc.Status }}</span>
+          </td>
+          <td>
+            <span class="priority" [ngClass]="priorityClass(tc.Priority)">
+              {{ tc.Priority || '&mdash;' }}
+            </span>
+          </td>
+          <td class="col-action">
+            <a [routerLink]="['/test-cases', tc.TestCaseID, 'edit']"
+               class="edit-btn"
+               (click)="$event.stopPropagation()">Edit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

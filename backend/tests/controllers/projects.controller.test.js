@@ -50,6 +50,36 @@ describe('Projects controller (via routes)', () => {
     });
   });
 
+  describe('GET /api/projects (Projects table view)', () => {
+    it('returns 200 with a bare array of all projects when no filters are given', async () => {
+      projectsService.listProjects.mockResolvedValue([
+        { ProjectID: 1, ProjectName: 'Alpha' },
+        { ProjectID: 2, ProjectName: 'Beta' },
+      ]);
+
+      const res = await request(app).get('/api/projects');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([
+        { ProjectID: 1, ProjectName: 'Alpha' },
+        { ProjectID: 2, ProjectName: 'Beta' },
+      ]);
+    });
+
+    it('passes query filters through to the service', async () => {
+      projectsService.listProjects.mockResolvedValue([]);
+
+      await request(app).get('/api/projects').query({ projectName: 'Alpha', status: 'Active' });
+      expect(projectsService.listProjects).toHaveBeenCalledWith({ projectName: 'Alpha', status: 'Active' });
+    });
+
+    it('returns an empty array when nothing matches', async () => {
+      projectsService.listProjects.mockResolvedValue([]);
+      const res = await request(app).get('/api/projects');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual([]);
+    });
+  });
+
   describe('PUT /api/projects/:id (US-002)', () => {
     it('returns 200 with the updated project', async () => {
       projectsService.getAllowedStatuses.mockResolvedValue(['Active', 'On Hold', 'Completed']);

@@ -1,0 +1,62 @@
+<div class="search-user-story-card">
+  <h2>Search User Stories</h2>
+
+  <form [formGroup]="form" (ngSubmit)="search()" class="filters">
+    <label>
+      Title
+      <input type="text" formControlName="title" placeholder="Partial title match" />
+    </label>
+
+    <label>
+      Project ID
+      <input type="number" formControlName="projectId" placeholder="Exact match" />
+    </label>
+
+    <label>
+      Status
+      <select formControlName="status">
+        <option value="">(any)</option>
+        <option *ngFor="let status of allowedStatuses" [value]="status">{{ status }}</option>
+      </select>
+    </label>
+
+    <label>
+      Priority
+      <select formControlName="priority">
+        <option value="">(any)</option>
+        <option *ngFor="let priority of allowedPriorities" [value]="priority">{{ priority }}</option>
+      </select>
+    </label>
+
+    <button type="submit" [disabled]="searching">{{ searching ? 'Searching...' : 'Search' }}</button>
+  </form>
+
+  <p class="error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+
+  <table class="results" *ngIf="hasSearched && results.length > 0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Project</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let story of results">
+        <td>{{ story.StoryID }}</td>
+        <td>{{ story.Title }}</td>
+        <td>{{ story.ProjectID }}</td>
+        <td>{{ story.Status }}</td>
+        <td>{{ story.Priority }}</td>
+        <td><a [routerLink]="['/user-stories', story.StoryID, 'edit']">Edit</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="empty" *ngIf="hasSearched && !searching && results.length === 0 && !errorMessage">
+    No user stories match your search.
+  </p>
+</div>

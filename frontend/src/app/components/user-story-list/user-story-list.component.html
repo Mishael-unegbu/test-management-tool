@@ -1,0 +1,93 @@
+<div class="page">
+  <div class="toolbar">
+    <h1 class="page-title">User Stories</h1>
+
+    <form class="filters" [formGroup]="filterForm" (ngSubmit)="load()">
+      <input type="text" formControlName="title" placeholder="Filter by title" class="keyword-input" />
+      <input type="number" formControlName="projectId" placeholder="Project ID" class="proj-input" />
+
+      <select formControlName="status" class="filter-select" (change)="load()">
+        <option value="">Status</option>
+        <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+      </select>
+
+      <select formControlName="priority" class="filter-select" (change)="load()">
+        <option value="">Priority</option>
+        <option *ngFor="let p of priorityOptions" [value]="p">{{ p }}</option>
+      </select>
+
+      <button type="submit" class="apply-btn">Search</button>
+    </form>
+
+    <a *ngIf="filteredProjectId" [routerLink]="['/projects', filteredProjectId, 'user-stories', 'new']" class="add-btn">+ Add User Story</a>
+    <a *ngIf="!filteredProjectId" routerLink="/user-stories" class="add-btn-disabled" title="Select a project first to add a user story">+ Add User Story</a>
+  </div>
+
+  <div class="filter-banner" *ngIf="filteredProjectId">
+    Showing user stories for <strong>{{ filteredProjectName || 'Project ' + filteredProjectId }}</strong>.
+    <a (click)="clearProjectFilter()" class="clear-filter-link">Clear filter</a>
+  </div>
+
+  <div class="card">
+    <div class="card-banner">
+      <h2 *ngIf="!filteredProjectId">User Stories &ndash; Full List</h2>
+      <h2 *ngIf="filteredProjectId">User Stories for {{ filteredProjectName || 'Project ' + filteredProjectId }}</h2>
+      <p class="banner-hint">Click any row to view its test cases &bull; Use the Edit button to edit the story</p>
+    </div>
+
+    <div class="loading" *ngIf="loading">Loading user stories&hellip;</div>
+    <div class="error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <table class="stories-table" *ngIf="!loading && !errorMessage && stories.length > 0">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="sortable" (click)="sortBy('Title')">Title <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('ProjectID')">Project <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('Status')">Status <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('Priority')">Priority <span class="sort-arrows">&#8597;</span></th>
+          <th class="sortable" (click)="sortBy('CreatedBy')">Created By <span class="sort-arrows">&#8597;</span></th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let story of stories; let i = index"
+          class="clickable-row"
+          (click)="navigateToTestCase(story.StoryID)"
+          title="Add test case for: {{ story.Title }}"
+        >
+          <td class="col-num">{{ i + 1 }}.</td>
+          <td class="col-title">
+            <span class="avatar" [style.background]="avatarColorFor(story.Title)">
+              {{ initialFor(story.Title) }}
+            </span>
+            <span class="story-name">{{ story.Title }}</span>
+          </td>
+          <td>{{ story.ProjectID }}</td>
+          <td>
+            <span class="status" [ngClass]="statusClass(story.Status)">{{ story.Status }}</span>
+          </td>
+          <td>
+            <span class="priority" [ngClass]="priorityClass(story.Priority)">{{ story.Priority || '&mdash;' }}</span>
+          </td>
+          <td>{{ story.CreatedBy || '&mdash;' }}</td>
+          <td class="col-action">
+            <!-- stopPropagation prevents the row click from also firing -->
+            <a
+              [routerLink]="['/user-stories', story.StoryID, 'edit']"
+              class="edit-btn"
+              (click)="$event.stopPropagation()"
+            >Edit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty" *ngIf="!loading && !errorMessage && stories.length === 0">
+      <p>No user stories found.</p>
+      <p class="hint" *ngIf="filteredProjectId">This project has no user stories yet. Use the button above to add one.</p>
+      <p class="hint" *ngIf="!filteredProjectId">Click a project from the Projects page to see its stories.</p>
+    </div>
+  </div>
+</div>

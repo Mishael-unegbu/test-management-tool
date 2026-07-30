@@ -1,0 +1,90 @@
+<div class="page">
+  <div class="toolbar">
+    <h1 class="page-title">Projects</h1>
+
+    <form class="filters" [formGroup]="filterForm" (ngSubmit)="load()">
+      <input
+        type="text"
+        formControlName="keyword"
+        placeholder="Filter by keyword e.g. name"
+        class="keyword-input"
+      />
+
+      <select formControlName="status" class="status-select" (change)="load()">
+        <option value="">Status</option>
+        <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+      </select>
+
+      <button type="submit" class="apply-btn">Search</button>
+    </form>
+
+    <a routerLink="/projects/new" class="add-btn">+ Add Project</a>
+  </div>
+
+  <div class="card">
+    <div class="card-banner">
+      <h2>Projects &ndash; Full List</h2>
+      <p class="banner-hint">Click any row to view its user stories</p>
+    </div>
+
+    <div class="loading" *ngIf="loading">Loading projects&hellip;</div>
+    <div class="error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <table class="projects-table" *ngIf="!loading && !errorMessage && projects.length > 0">
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th class="sortable" (click)="sortBy('ProjectName')">
+            Name <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th>Description</th>
+          <th class="sortable" (click)="sortBy('Status')">
+            Status <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th class="sortable" (click)="sortBy('StartDate')">
+            Start Date <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th class="sortable" (click)="sortBy('EndDate')">
+            End Date <span class="sort-arrows">&#8597;</span>
+          </th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let project of projects; let i = index"
+          class="clickable-row"
+          (click)="navigateToStories(project.ProjectID)"
+          title="View user stories for {{ project.ProjectName }}"
+        >
+          <td class="col-num">{{ i + 1 }}.</td>
+          <td class="col-name">
+            <span class="avatar" [style.background]="avatarColorFor(project.ProjectName)">
+              {{ initialFor(project.ProjectName) }}
+            </span>
+            <span class="project-name">{{ project.ProjectName }}</span>
+          </td>
+          <td class="col-description">{{ project.Description || '&mdash;' }}</td>
+          <td>
+            <span class="status" [ngClass]="statusClass(project.Status)">{{ project.Status }}</span>
+          </td>
+          <td>{{ project.StartDate || '&mdash;' }}</td>
+          <td>{{ project.EndDate || '&mdash;' }}</td>
+          <td class="col-action">
+            <!-- stopPropagation prevents the row click from also firing -->
+            <a
+              [routerLink]="['/projects', project.ProjectID, 'edit']"
+              class="edit-btn"
+              (click)="$event.stopPropagation()"
+            >Edit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty" *ngIf="!loading && !errorMessage && projects.length === 0">
+      <p>No projects yet.</p>
+      <a routerLink="/projects/new" class="add-btn">+ Add Project</a>
+    </div>
+  </div>
+</div>

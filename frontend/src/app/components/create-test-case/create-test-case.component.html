@@ -1,0 +1,72 @@
+<!--
+  US-009 Create Test Case — see the STATUS comment at the top of
+  create-test-case.component.ts and SourceCode/frontend/US-009-review-notes.md.
+  This template is real and will render, but submitting it will fail: there is
+  no backend route for TestCases yet (TestCaseService.createTestCase() calls
+  POST /api/test-cases, which does not exist). Do not treat this as "done".
+-->
+<div class="create-test-case-card">
+  <div class="card-header">
+    <h2>Create Test Case</h2>
+    <a class="back-link" [routerLink]="['/user-stories']">Back to User Stories</a>
+  </div>
+
+  <p *ngIf="storyTitle" class="story-context">
+    Under user story: <strong>{{ storyTitle }}</strong> (ID {{ storyId }})
+  </p>
+  <div *ngIf="storyLoadError" class="error" role="alert">{{ storyLoadError }}</div>
+
+  <form *ngIf="!storyLoadError" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label>
+      Title *
+      <input type="text" formControlName="title" placeholder="e.g. Login with valid credentials" />
+    </label>
+    <div class="field-error" *ngIf="form.get('title')?.touched && form.get('title')?.invalid">
+      Title is required.
+    </div>
+
+    <label>
+      Description
+      <textarea formControlName="description" rows="3" placeholder="Optional description"></textarea>
+    </label>
+
+    <label>
+      Preconditions
+      <textarea formControlName="preconditions" rows="2" placeholder="Optional preconditions"></textarea>
+    </label>
+
+    <label>
+      Test Steps
+      <textarea formControlName="testSteps" rows="4" placeholder="Optional step-by-step instructions"></textarea>
+    </label>
+
+    <label>
+      Expected Result
+      <textarea formControlName="expectedResult" rows="2" placeholder="Optional expected result"></textarea>
+    </label>
+
+    <div class="field-row">
+      <label>
+        Priority
+        <select formControlName="priority">
+          <option value="">(none)</option>
+          <option *ngFor="let priority of allowedPriorities" [value]="priority">{{ priority }}</option>
+        </select>
+      </label>
+
+      <label>
+        Status
+        <select formControlName="status">
+          <option *ngFor="let status of allowedStatuses" [value]="status">{{ status }}</option>
+        </select>
+      </label>
+    </div>
+
+    <button type="submit" [disabled]="submitting">
+      {{ submitting ? 'Creating…' : 'Create Test Case' }}
+    </button>
+
+    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+    <p class="error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+  </form>
+</div>

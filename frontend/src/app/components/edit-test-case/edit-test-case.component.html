@@ -1,0 +1,79 @@
+<div class="edit-tc-card">
+
+  <div class="card-header">
+    <h2>Edit Test Case</h2>
+    <a *ngIf="storyId" [routerLink]="['/test-cases']"
+       [queryParams]="{ storyId: storyId }" class="back-link">&larr; Back to Test Cases</a>
+    <a *ngIf="!storyId" routerLink="/test-cases" class="back-link">&larr; Back to Test Cases</a>
+  </div>
+
+  <p *ngIf="storyTitle" class="story-context">
+    Under story: <strong>{{ storyTitle }}</strong> (ID {{ storyId }})
+  </p>
+
+  <div *ngIf="loading" class="loading">Loading test case&hellip;</div>
+  <div *ngIf="loadError" class="error" role="alert">{{ loadError }}</div>
+
+  <form *ngIf="!loading && !loadError" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <label>
+      Title *
+      <input type="text" formControlName="Title" />
+    </label>
+    <div class="field-error" *ngIf="form.get('Title')?.touched && form.get('Title')?.invalid">
+      Title is required.
+    </div>
+
+    <label>
+      Description
+      <textarea formControlName="Description" rows="3"
+                placeholder="Optional description"></textarea>
+    </label>
+
+    <label>
+      Preconditions
+      <textarea formControlName="Preconditions" rows="2"
+                placeholder="Conditions that must be met before running this test"></textarea>
+    </label>
+
+    <label>
+      Test Steps
+      <textarea formControlName="TestSteps" rows="5"
+                placeholder="Step-by-step instructions to execute the test"></textarea>
+    </label>
+
+    <label>
+      Expected Result
+      <textarea formControlName="ExpectedResult" rows="2"
+                placeholder="What the system should do if the test passes"></textarea>
+    </label>
+
+    <div class="field-row">
+      <label>
+        Priority
+        <select formControlName="Priority">
+          <option value="">(none)</option>
+          <option *ngFor="let p of allowedPriorities" [value]="p">{{ p }}</option>
+        </select>
+      </label>
+
+      <label>
+        Status *
+        <select formControlName="Status">
+          <option *ngFor="let s of allowedStatuses" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+    </div>
+    <div class="field-error" *ngIf="form.get('Status')?.touched && form.get('Status')?.invalid">
+      Status is required.
+    </div>
+
+    <button type="submit" [disabled]="saving">
+      {{ saving ? 'Saving&hellip;' : 'Save Changes' }}
+    </button>
+
+    <p class="success" *ngIf="saveSuccess">Test case updated successfully.</p>
+    <p class="error"   *ngIf="saveError" role="alert">{{ saveError }}</p>
+
+  </form>
+</div>
