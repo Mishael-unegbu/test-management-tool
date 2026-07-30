@@ -1,0 +1,22 @@
+# Dependencies
+/node_modules/
+
+# Build output
+/dist/
+
+# Angular CLI cache
+/.angular/
+
+# Logs
+npm-debug.log*
+ng-debug.log*
+
+# Environment / local config
+.env
+.env.*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

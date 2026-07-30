@@ -1,0 +1,52 @@
+<div class="edit-project-card">
+  <h2>Edit Project</h2>
+
+  <div *ngIf="loading" class="loading">Loading project…</div>
+  <div *ngIf="loadError" class="error" role="alert">{{ loadError }}</div>
+
+  <form *ngIf="!loading && !loadError" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <label>
+      Project Name *
+      <input type="text" formControlName="ProjectName" />
+    </label>
+    <div class="field-error" *ngIf="form.get('ProjectName')?.touched && form.get('ProjectName')?.invalid">
+      Project name is required.
+    </div>
+
+    <label>
+      Description
+      <textarea formControlName="Description" rows="3"></textarea>
+    </label>
+
+    <label>
+      Status *
+      <select formControlName="Status">
+        <option value="" disabled>Select a status</option>
+        <option *ngFor="let status of allowedStatuses" [value]="status">{{ status }}</option>
+      </select>
+    </label>
+    <div class="field-error" *ngIf="form.get('Status')?.touched && form.get('Status')?.invalid">
+      Status is required.
+    </div>
+
+    <div class="date-row">
+      <label>
+        Start Date
+        <input type="date" formControlName="StartDate" />
+      </label>
+      <label>
+        End Date
+        <input type="date" formControlName="EndDate" />
+      </label>
+    </div>
+
+    <div class="field-error" *ngIf="form.errors?.['endBeforeStart']">
+      End date cannot be earlier than start date.
+    </div>
+
+    <button type="submit" [disabled]="saving">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
+
+    <p class="success" *ngIf="saveSuccess">Project updated successfully.</p>
+    <p class="error" *ngIf="saveError" role="alert">{{ saveError }}</p>
+  </form>
+</div>

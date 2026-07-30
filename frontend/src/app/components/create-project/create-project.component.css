@@ -1,0 +1,71 @@
+.create-project-card {
+  max-width: 480px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  display: block;
+  margin-bottom: 14px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+input,
+textarea,
+select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-weight: 400;
+}
+
+.date-row {
+  display: flex;
+  gap: 16px;
+}
+
+.date-row label {
+  flex: 1;
+}
+
+button {
+  padding: 10px 18px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:disabled {
+  background: #93b4f0;
+  cursor: not-allowed;
+}
+
+.field-error {
+  color: #c0392b;
+  font-size: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+
+.success {
+  color: #1e7e34;
+  font-size: 14px;
+}
+
+.error {
+  color: #c0392b;
+  font-size: 14px;
+}

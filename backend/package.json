@@ -1,0 +1,21 @@
+{
+  "name": "qa-management-tool-backend",
+  "version": "0.2.0",
+  "description": "QA Management Tool - Node.js/Express backend (Excel-backed storage)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
