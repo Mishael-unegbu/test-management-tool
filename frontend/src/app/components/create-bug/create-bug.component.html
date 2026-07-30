@@ -56,11 +56,34 @@
       <textarea formControlName="description" rows="3" placeholder="Optional description"></textarea>
     </label>
 
-    <label>
-      Steps to Reproduce
-      <textarea formControlName="stepsToReproduce" rows="4"
-                placeholder="1. Go to…&#10;2. Click on…&#10;3. Observe…"></textarea>
-    </label>
+    <!-- ── Steps to Reproduce ────────────────────────────────── -->
+    <div class="steps-section">
+      <span class="steps-label">Steps to Reproduce</span>
+
+      <div class="steps-input-row">
+        <input
+          type="text"
+          class="steps-input"
+          [(ngModel)]="stepsInput"
+          [ngModelOptions]="{ standalone: true }"
+          (keydown)="onStepsKeydown($event)"
+          placeholder="Type a step and click Add"
+        />
+        <button type="button" class="steps-add-btn" (click)="addStep()">+ Add</button>
+      </div>
+      <div class="field-error" *ngIf="stepsInputError">{{ stepsInputError }}</div>
+
+      <ol class="steps-list" *ngIf="stepsItems.length > 0">
+        <li *ngFor="let item of stepsItems; let i = index" class="steps-item">
+          <span class="steps-text">{{ item }}</span>
+          <button type="button" class="steps-remove-btn" (click)="removeStep(i)" title="Remove">&#10005;</button>
+        </li>
+      </ol>
+      <p class="steps-empty-hint" *ngIf="stepsItems.length === 0">
+        No steps added yet.
+      </p>
+    </div>
+    <!-- ─────────────────────────────────────────────── -->
 
     <div class="field-row">
       <label>

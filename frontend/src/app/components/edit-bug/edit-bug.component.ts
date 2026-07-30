@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BugService } from '../../services/bug.service';
 import { Bug, BugEditPayload, BUG_SEVERITIES, BUG_STATUSES, BUG_PRIORITIES } from '../../models/bug.model';
 import { extractErrorMessage } from '../../shared/http-error.util';
@@ -16,7 +16,7 @@ import { extractErrorMessage } from '../../shared/http-error.util';
 @Component({
   selector: 'app-edit-bug',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './edit-bug.component.html',
   styleUrls: ['./edit-bug.component.css'],
 })
@@ -40,6 +40,13 @@ export class EditBugComponent implements OnInit {
   executionId:   number | string | null = null;
   reporter:      string | null = null;
 
+  // Steps to Reproduce — same add/list/remove widget as Acceptance Criteria
+  // on Edit User Story: loaded by splitting the stored '\n'-delimited
+  // string, serialised back to '\n'-delimited on save.
+  stepsItems: string[] = [];
+  stepsInput = '';
+  stepsInputError = '';
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -51,7 +58,6 @@ export class EditBugComponent implements OnInit {
       Priority:         [''],
       Status:           ['', Validators.required],
       Description:      [''],
-      StepsToReproduce: [''],
       ExpectedResult:   [''],
       ActualResult:     [''],
     });
@@ -75,10 +81,18 @@ export class EditBugComponent implements OnInit {
           Priority:         bug.Priority         ?? '',
           Status:           bug.Status           ?? 'Open',
           Description:      bug.Description      ?? '',
-          StepsToReproduce: bug.StepsToReproduce ?? '',
           ExpectedResult:   bug.ExpectedResult   ?? '',
           ActualResult:     bug.ActualResult     ?? '',
         });
+
+        // Split the stored newline-delimited string back into individual
+        // steps, filtering out any empty lines that may have crept in.
+        const rawSteps = bug.StepsToReproduce ?? '';
+        this.stepsItems = rawSteps
+          .split('\n')
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+
         this.testCaseId    = bug.TestCaseID;
         this.testCaseTitle = bug.TestCaseTitle ?? null;
         this.executionId   = bug.ExecutionID   ?? null;
@@ -94,6 +108,22 @@ export class EditBugComponent implements OnInit {
     });
   }
 
+  addStep(): void {
+    this.stepsInputError = '';
+    const trimmed = this.stepsInput.trim();
+    if (!trimmed) { this.stepsInputError = 'Please enter a step before adding.'; return; }
+    this.stepsItems = [...this.stepsItems, trimmed];
+    this.stepsInput = '';
+  }
+
+  onStepsKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') { event.preventDefault(); this.addStep(); }
+  }
+
+  removeStep(index: number): void {
+    this.stepsItems = this.stepsItems.filter((_, i) => i !== index);
+  }
+
   onSubmit(): void {
     if (this.form.invalid || !this.bugId) { this.form.markAllAsTouched(); return; }
     this.saving      = true;
@@ -107,7 +137,7 @@ export class EditBugComponent implements OnInit {
       Priority:         v.Priority         || undefined,
       Status:           v.Status,
       Description:      v.Description      || null,
-      StepsToReproduce: v.StepsToReproduce || null,
+      StepsToReproduce: this.stepsItems.length > 0 ? this.stepsItems.join('\n') : null,
       ExpectedResult:   v.ExpectedResult   || null,
       ActualResult:     v.ActualResult     || null,
     };

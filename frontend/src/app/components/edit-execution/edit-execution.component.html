@@ -10,6 +10,10 @@
 
   <p *ngIf="testCaseTitle" class="tc-context">
     Test case: <strong>{{ testCaseTitle }}</strong> (ID {{ testCaseId }})
+    <span *ngIf="linkedBugId" class="linked-bug-tag">
+      &bull; Linked Bug:
+      <a [routerLink]="['/bugs', linkedBugId, 'edit']">#{{ linkedBugId }}</a>
+    </span>
   </p>
 
   <div *ngIf="loading" class="loading">Loading execution&hellip;</div>
@@ -55,10 +59,11 @@
       <textarea formControlName="Notes" rows="2"></textarea>
     </label>
 
-    <label>
-      Linked Bug ID
-      <input type="number" formControlName="LinkedBugID" placeholder="Bug ID (if failed)" />
-    </label>
+    <p class="linked-bug-hint" *ngIf="!linkedBugId">
+      No bug linked to this execution yet. To report one, go back to
+      Executions and use “+ Report Bug” from the Bugs list filtered to this
+      execution.
+    </p>
 
     <button type="submit" [disabled]="saving">
       {{ saving ? 'Saving&hellip;' : 'Save Changes' }}

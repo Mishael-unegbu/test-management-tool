@@ -36,8 +36,11 @@ export interface ExecutionEditPayload {
   Status?: string;
   ActualResult?: string | null;
   Notes?: string | null;
-  LinkedBugID?: number | null;
   ExecutedBy?: string;
+  // LinkedBugID intentionally omitted — read-only/display-only.
+  // TestExecutions is append-only; Bug.ExecutionID is the source of truth
+  // for the Bug–Execution link, set once at Bug creation. See
+  // TestExecutionService/EditExecutionComponent for the read-only display.
 }
 
 export interface ExecutionListFilters {

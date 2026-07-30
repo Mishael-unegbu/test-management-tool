@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { BugService } from '../../services/bug.service';
 import { TestCaseService } from '../../services/test-case.service';
@@ -19,7 +19,7 @@ import { extractErrorMessage } from '../../shared/http-error.util';
 @Component({
   selector: 'app-create-bug',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink],
   templateUrl: './create-bug.component.html',
   styleUrls: ['./create-bug.component.css'],
 })
@@ -38,6 +38,15 @@ export class CreateBugComponent implements OnInit {
   successMessage = '';
   createdBugId: number | null = null;
 
+  // Steps to Reproduce — same add/list/remove widget as Acceptance Criteria
+  // on User Story (create-user-story.component.ts), storing items as a
+  // '\n'-joined string in the StepsToReproduce column. Steps are inherently
+  // ordered, so the numbered-list presentation fits even more naturally here
+  // than it does for acceptance criteria.
+  stepsItems: string[] = [];
+  stepsInput = '';
+  stepsInputError = '';
+
   form: ReturnType<FormBuilder['group']>;
 
   constructor(
@@ -54,7 +63,6 @@ export class CreateBugComponent implements OnInit {
       priority:         [''],
       status:           ['Open'],
       description:      [''],
-      stepsToReproduce: [''],
       expectedResult:   [''],
       actualResult:     [''],
     });
@@ -85,6 +93,22 @@ export class CreateBugComponent implements OnInit {
     }
   }
 
+  addStep(): void {
+    this.stepsInputError = '';
+    const trimmed = this.stepsInput.trim();
+    if (!trimmed) { this.stepsInputError = 'Please enter a step before adding.'; return; }
+    this.stepsItems = [...this.stepsItems, trimmed];
+    this.stepsInput = '';
+  }
+
+  onStepsKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') { event.preventDefault(); this.addStep(); }
+  }
+
+  removeStep(index: number): void {
+    this.stepsItems = this.stepsItems.filter((_, i) => i !== index);
+  }
+
   submit(): void {
     this.errorMessage = '';
     this.successMessage = '';
@@ -108,7 +132,7 @@ export class CreateBugComponent implements OnInit {
         priority:         v.priority   || undefined,
         status:           v.status     || 'Open',
         description:      v.description      || undefined,
-        stepsToReproduce: v.stepsToReproduce  || undefined,
+        stepsToReproduce: this.stepsItems.length > 0 ? this.stepsItems.join('\n') : undefined,
         expectedResult:   v.expectedResult    || undefined,
         actualResult:     v.actualResult      || undefined,
       })
@@ -117,10 +141,12 @@ export class CreateBugComponent implements OnInit {
           this.submitting = false;
           this.successMessage = `Bug #${bug.BugID} — "${bug.Title}" reported.`;
           this.createdBugId = bug.BugID;
+          this.stepsItems = [];
+          this.stepsInput = '';
           this.form.reset({
             title: '', reporter: v.reporter, severity: 'High',
             priority: '', status: 'Open',
-            description: '', stepsToReproduce: '', expectedResult: '', actualResult: '',
+            description: '', expectedResult: '', actualResult: '',
           });
         },
         error: (err) => {

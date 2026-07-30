@@ -4,6 +4,10 @@
 .back-link { font-size: 13px; color: #2563eb; text-decoration: none; }
 .back-link:hover { text-decoration: underline; }
 .tc-context { font-size: 14px; color: #444; margin: -6px 0 18px; }
+.linked-bug-tag { color: #6b7280; }
+.linked-bug-tag a { color: #2563eb; text-decoration: none; font-weight: 600; }
+.linked-bug-tag a:hover { text-decoration: underline; }
+.linked-bug-hint { font-size: 13px; color: #9ca3af; font-style: italic; margin: -6px 0 16px; }
 label { display: block; margin-bottom: 14px; font-weight: 600; font-size: 14px; color: #374151; }
 input, textarea, select { display: block; width: 100%; margin-top: 6px; padding: 8px 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-weight: 400; color: #1f2937; }
 textarea { resize: vertical; }

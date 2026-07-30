@@ -36,6 +36,12 @@ export class EditExecutionComponent implements OnInit {
   testCaseId:    number | null = null;
   testCaseTitle: string | null = null;
 
+  // Read-only/display-only — never sent back on save. TestExecutions is
+  // append-only, so this can only ever be read here, not edited. See the
+  // comment in testExecutionsService.js for why. Bug.ExecutionID (set once
+  // at Bug creation) is the actual source of truth for this relationship.
+  linkedBugId: number | string | null = null;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -48,7 +54,6 @@ export class EditExecutionComponent implements OnInit {
       Environment:  [''],
       ActualResult: [''],
       Notes:        [''],
-      LinkedBugID:  [''],
     });
   }
 
@@ -74,10 +79,10 @@ export class EditExecutionComponent implements OnInit {
           Environment:  ex.Environment  ?? '',
           ActualResult: ex.ActualResult ?? '',
           Notes:        ex.Notes        ?? '',
-          LinkedBugID:  ex.LinkedBugID  ?? '',
         });
         this.testCaseId    = ex.TestCaseID;
         this.testCaseTitle = ex.TestCaseTitle ?? null;
+        this.linkedBugId   = ex.LinkedBugID ?? null;
         this.loading       = false;
       },
       error: (err) => {
@@ -108,7 +113,6 @@ export class EditExecutionComponent implements OnInit {
       Environment:  v.Environment  || null,
       ActualResult: v.ActualResult || null,
       Notes:        v.Notes        || null,
-      LinkedBugID:  v.LinkedBugID  ? Number(v.LinkedBugID) : null,
     };
 
     this.executionService.updateExecution(this.executionId, payload).subscribe({
