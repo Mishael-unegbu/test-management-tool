@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ProjectService } from '../../services/project.service';
 import { Project, ProjectEditPayload, PROJECT_STATUSES } from '../../models/project.model';
+import { extractErrorMessage } from '../../shared/http-error.util';
 
 /**
  * US-002 Edit Project
@@ -16,17 +17,6 @@ function endDateNotBeforeStartDate(group: AbstractControl): ValidationErrors | n
   const end = group.get('EndDate')?.value;
   if (!start || !end) return null;
   return new Date(end) < new Date(start) ? { endBeforeStart: true } : null;
-}
-
-/** Extracts a human-readable message from either backend error shape:
- *  - validation failures: { errors: string[] }        (400, from the validator)
- *  - service-level failures: { error: string }         (404 / 409 / 500)
- */
-function extractErrorMessage(err: unknown, fallback: string): string {
-  const body = (err as { error?: { errors?: string[]; error?: string } })?.error;
-  if (body?.errors?.length) return body.errors.join(' ');
-  if (body?.error) return body.error;
-  return fallback;
 }
 
 @Component({

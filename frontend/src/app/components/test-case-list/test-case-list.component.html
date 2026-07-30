@@ -1,0 +1,88 @@
+<div class="tc-list-page">
+  <div class="tc-list-card">
+    <div class="tc-list-banner">
+      <h2>{{ bannerTitle }}</h2>
+      <p class="tc-list-banner-hint">Click a row to open the test case for editing.</p>
+    </div>
+
+    <div class="tc-list-toolbar">
+      <span class="tc-list-count">{{ testCases.length }} test case(s)</span>
+
+      <a
+        *ngIf="filteredStoryId; else addDisabled"
+        class="tc-list-add-btn"
+        [routerLink]="['/user-stories', filteredStoryId, 'test-cases', 'new']"
+        >+ Add Test Case</a
+      >
+      <ng-template #addDisabled>
+        <span class="tc-list-add-btn tc-list-add-btn-disabled" title="Select a story first">+ Add Test Case</span>
+      </ng-template>
+    </div>
+
+    <div class="tc-list-filter-banner" *ngIf="filteredStoryId">
+      Showing test cases for <strong>{{ storyTitle }}</strong
+      >.
+      <button type="button" class="tc-list-clear-filter" (click)="clearStoryFilter()">Clear filter</button>
+    </div>
+
+    <p class="tc-list-loading" *ngIf="loading">Loading test cases…</p>
+    <p class="tc-list-error" *ngIf="loadError" role="alert">{{ loadError }}</p>
+
+    <table class="tc-list-table" *ngIf="!loading && !loadError && testCases.length">
+      <thead>
+        <tr>
+          <th class="tc-list-index-col">#</th>
+          <th class="tc-list-sortable" (click)="sortBy('Title')">
+            Title <span class="tc-list-sort-arrow">{{ sortIndicator('Title') }}</span>
+          </th>
+          <th>Story ID</th>
+          <th>Project ID</th>
+          <th class="tc-list-sortable" (click)="sortBy('Status')">
+            Status <span class="tc-list-sort-arrow">{{ sortIndicator('Status') }}</span>
+          </th>
+          <th class="tc-list-sortable" (click)="sortBy('Priority')">
+            Priority <span class="tc-list-sort-arrow">{{ sortIndicator('Priority') }}</span>
+          </th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let testCase of testCases; let i = index" class="tc-list-row" (click)="openTestCase(testCase)">
+          <td class="tc-list-index">{{ i + 1 }}</td>
+          <td>
+            <span class="tc-list-avatar" [style.background]="avatarColor(testCase.Title)">{{
+              initial(testCase.Title)
+            }}</span>
+            <span class="tc-name">{{ testCase.Title }}</span>
+          </td>
+          <td>{{ testCase.StoryID }}</td>
+          <td>{{ testCase.ProjectID }}</td>
+          <td>
+            <span class="tc-list-status" [ngClass]="statusClass(testCase.Status)">{{ testCase.Status || '—' }}</span>
+          </td>
+          <td>
+            <span class="tc-list-priority" [ngClass]="priorityClass(testCase.Priority)">{{
+              testCase.Priority || '—'
+            }}</span>
+          </td>
+          <td>
+            <a
+              class="tc-list-edit-btn"
+              [routerLink]="['/test-cases', testCase.TestCaseID, 'edit']"
+              (click)="$event.stopPropagation()"
+              >Edit</a
+            >
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="tc-list-empty" *ngIf="!loading && !loadError && !testCases.length">
+      {{
+        filteredStoryId
+          ? 'No test cases for this story yet. Use the button above to add one.'
+          : 'No test cases found. Click a user story to see its test cases.'
+      }}
+    </p>
+  </div>
+</div>
